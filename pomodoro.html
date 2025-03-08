@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        #timer {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: green;
+        }
+        #countUpTimer {
+            font-size: 2rem;
+            margin-top: 20px;
+            color: red;
+        }
+        input {
+            font-size: 1rem;
+            padding: 5px;
+            margin: 10px;
+        }
+        button {
+            font-size: 1rem;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomodoro Timer</h1>
+    <div id="timer">25:00</div>
+    <input type="number" id="minutes" placeholder="Minutes" min="1">
+    <button onclick="startTimer()">Start</button>
+    <button id="pauseButton" onclick="pauseOrResumeTimer()">Pause</button>
+    <div id="countUpTimer">0:00</div>
+    <script>
+        let timerInterval;
+        let countUpInterval;
+        let paused = false;
+        let seconds;
+        let countUpSeconds = 0;
+        let originalTitle = document.title;
+
+        function startTimer() {
+            const minutesInput = document.getElementById('minutes');
+            if (!paused) {
+                let time = parseInt(minutesInput.value) || 25; // Default to 25 minutes
+                seconds = time * 60;
+                countUpSeconds = 0;
+                updateCountUpTimer();
+            }
+
+            clearInterval(timerInterval);
+            clearInterval(countUpInterval);
+            timerInterval = setInterval(() => {
+                const displayMinutes = Math.floor(seconds / 60);
+                const displaySeconds = seconds % 60;
+                document.getElementById('timer').textContent = 
+                    `${displayMinutes}:${displaySeconds < 10 ? '0' : ''}${displaySeconds}`;
+
+                if (seconds > 0) {
+                    seconds--;
+                } else {
+                    clearInterval(timerInterval);
+                    flashPage();
+                    flashTitle();
+                    startCountUpTimer();
+                }
+            }, 1000);
+            paused = false;
+            document.getElementById('pauseButton').textContent = 'Pause';
+            document.getElementById('countUpTimer').textContent = '0:00';
+        }
+
+        function pauseOrResumeTimer() {
+            if (paused) {
+                startTimer();
+            } else {
+                clearInterval(timerInterval);
+                startCountUpTimer();
+                paused = true;
+                document.getElementById('pauseButton').textContent = 'Resume';
+            }
+        }
+
+        function startCountUpTimer() {
+            clearInterval(countUpInterval);
+            countUpInterval = setInterval(() => {
+                countUpSeconds++;
+                updateCountUpTimer();
+            }, 1000);
+        }
+
+        function updateCountUpTimer() {
+            const displayMinutes = Math.floor(countUpSeconds / 60);
+            const displaySeconds = countUpSeconds % 60;
+            document.getElementById('countUpTimer').textContent = 
+                `${displayMinutes}:${displaySeconds < 10 ? '0' : ''}${displaySeconds}`;
+        }
+
+        function flashPage() {
+            let flashCount = 0;
+            const flashInterval = setInterval(() => {
+                document.body.style.backgroundColor = 
+                    flashCount % 2 === 0 ? 'red' : '#f4f4f4';
+                flashCount++;
+                if (flashCount >= 6) {
+                    clearInterval(flashInterval);
+                    document.body.style.backgroundColor = '#f4f4f4';
+                }
+            }, 500);
+        }
+
+        function flashTitle() {
+            let flashCount = 0;
+            const flashInterval = setInterval(() => {
+                document.title = flashCount % 2 === 0 ? "Time's Up!" : originalTitle;
+                flashCount++;
+                if (flashCount >= 6) {
+                    clearInterval(flashInterval);
+                    document.title = originalTitle;
+                }
+            }, 500);
+        }
+    </script>
+</body>
+</html>
+
